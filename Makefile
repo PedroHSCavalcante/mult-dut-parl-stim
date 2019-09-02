@@ -14,8 +14,7 @@ RUN_ARGS_COMMON = -access +r -input ./shm.tcl \
 		  +uvm_set_config_int=*,recording_detail,1 -coverage all -covoverwrite
 
 sim: clean
-	@g++ -g -fPIC -Wall -std=c++0x refmod.cpp -shared -o test.so
-	xrun -64bit -uvm $(PKGS) $(IFS) $(RTL) $(RTL2) top.sv -sv_lib test.so \
+	xrun -64bit -uvm $(PKGS) $(IFS) $(RTL) $(RTL2) top.sv \
 		+UVM_TESTNAME=simple_test -covtest simple_test $(RUN_ARGS_COMMON) 
 
 clean:

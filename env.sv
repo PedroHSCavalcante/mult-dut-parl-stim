@@ -1,3 +1,4 @@
+
 class env extends uvm_env;
 
     agent       mst;
@@ -21,6 +22,6 @@ class env extends uvm_env;
         super.connect_phase(phase);
         mst.agt_req_port.connect(cov.req_port);
         mst.agt_resp_port.connect(sb.ap_comp);
-        mst.agt_req_port.connect(sb.ap_rfm);
+        mst.agt_req_port.connect(sb.ap_comp2);
     endfunction
 endclass

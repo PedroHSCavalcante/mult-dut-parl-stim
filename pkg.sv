@@ -11,7 +11,6 @@ package pkg;
   `include "./monitor.sv"
   `include "./agent.sv"
 
-  `include "./refmod.sv"
   `include "./coverage.sv"
   `include "./scoreboard.sv"
   `include "./env.sv"
