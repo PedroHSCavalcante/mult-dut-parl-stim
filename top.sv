@@ -17,14 +17,24 @@ module top;
   always #10 clk = !clk;
 
   interface_if dut_if(.clk(clk), .rst(rst));
+  interface_if dut_if2(.clk(clk), .rst(rst));
   
-  sqrt my_sqrt(
+  sqrt sqrt_i(
               .clk_i(clk),
               .rstn_i(rst),
               .enb_i(dut_if.enb_i),
               .dt_i(dut_if.dt_i),
               .busy_o(dut_if.busy_o),
               .dt_o(dut_if.dt_o)
+  );
+
+  my_sqrt my_sqrt_i(
+              .clk_i(clk),
+              .rstn_i(rst),
+              .enb_i(dut_if2.enb_i),
+              .dt_i(dut_if2.dt_i),
+              .busy_o(dut_if2.busy_o),
+              .dt_o(dut_if2.dt_o)
   );
 
   initial begin
@@ -40,6 +50,7 @@ module top;
     `endif
 
     uvm_config_db#(interface_vif)::set(uvm_root::get(), "*", "vif", dut_if);
+    uvm_config_db#(interface_vif)::set(uvm_root::get(), "*", "vif2", dut_if2);
 
     run_test("simple_test");
   end

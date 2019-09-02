@@ -1,17 +1,18 @@
 class monitor extends uvm_monitor;
 
     interface_vif  vif;
+    interface_vif  vif2;
     event begin_record, end_record;
-    transaction_in tr_in;
     transaction_out tr_out;
-    uvm_analysis_port #(transaction_in) req_port;
-    uvm_analysis_port #(transaction_out) resp_port;
+    transaction_out tr_out_2;
+    uvm_analysis_port #(transaction_out) resp_port_01;
+    uvm_analysis_port #(transaction_out) resp_port_02;
     `uvm_component_utils(monitor)
    
     function new(string name, uvm_component parent);
         super.new(name, parent);
-        req_port = new ("req_port", this);
-        resp_port = new ("resp_port", this);
+        resp_port_01 = new ("resp_port_01", this);
+        resp_port_02 = new ("resp_port_02", this);
     endfunction
 
     virtual function void build_phase(uvm_phase phase);
@@ -19,36 +20,50 @@ class monitor extends uvm_monitor;
          if(!uvm_config_db#(interface_vif)::get(this, "", "vif", vif)) begin
             `uvm_fatal("NOVIF", "failed to get virtual interface")
         end
-        tr_in = transaction_in::type_id::create("tr_in", this);
+
+        if(!uvm_config_db#(interface_vif)::get(this, "", "vif2", vif2)) begin
+            `uvm_fatal("NOVIF", "failed to get virtual interface")
+        end
+
         tr_out = transaction_out::type_id::create("tr_out", this);
+        tr_out_2 = transaction_out::type_id::create("tr_out_2", this);
     endfunction
 
     virtual task run_phase(uvm_phase phase);
         super.run_phase(phase);
         fork
-            collect_transactions(phase);
+            collect_transactions_01(phase);
+            collect_transactions_02(phase);
         join
     endtask
 
-    virtual task collect_transactions(uvm_phase phase);
+    virtual task collect_transactions_01(uvm_phase phase);
         forever begin
 
             @(posedge vif.clk) begin
                 
-                if(!vif.busy_o) begin
-                    @(posedge vif.busy_o);
-                    begin_tr(tr_in, "req");
-                    tr_in.data = vif.dt_i;
-                    req_port.write(tr_in);
-                    @(posedge vif.clk);
-                    end_tr(tr_in);
-                end
-                else if(vif.busy_o)begin
+                if(vif.busy_o)begin
                     @(negedge vif.busy_o);
                     begin_tr(tr_out, "resp");
                     tr_out.result = vif.dt_o;
-                    resp_port.write(tr_out);
+                    resp_port_01.write(tr_out);
                     end_tr(tr_out);
+                end
+            end
+        end
+    endtask
+
+     virtual task collect_transactions_02(uvm_phase phase);
+        forever begin
+
+            @(posedge vif2.clk) begin
+                
+              if(vif2.busy_o)begin
+                    @(negedge vif2.busy_o);
+                    begin_tr(tr_out_2, "resp");
+                    tr_out_2.result = vif2.dt_o;
+                    resp_port_02.write(tr_out_2);
+                    end_tr(tr_out_2);
                 end
             end
         end
